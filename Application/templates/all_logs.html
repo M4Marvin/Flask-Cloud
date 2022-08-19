@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>
+    Admin - All Logs
+</h1>
+<p>
+    Contains all activity by all users.
+</p>
+<!-- Table with all logs-->
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr class="text-center">
+            <th>User_ID</th>
+            <th>Action</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody class="text-center">
+        {% for log in logs %}
+        <tr class="text-center">
+            <td>{{ log.user_id }}</td>
+            <td>{{ log.actionType }}</td>
+            <td>{{ log.done_at }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

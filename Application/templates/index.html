@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if current_user.is_authenticated %}
+        <h1>Hi, {{ current_user.username }}</h1>
+    {% else %}
+    <h3>
+        <a href="{{ url_for('login') }}">Sign in</a>
+    </h3>
+    <h3>
+        <a href="{{ url_for('register') }}">Register</a>
+    </h3>
+    {% endif %}
+{% endblock %}
+
+{% block styles %}
+    .bg-image{
+        background-image: url("{{ url_for('static', filename='images/bg_home.jpg') }}");
+        background-size: cover;
+        background-repeat: repeat;
+        background-position: center;
+        height: 100vh;
+    }
+{% endblock %}

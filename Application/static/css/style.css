@@ -1,0 +1,44 @@
+
+html, body {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background-color: #212121;
+    color: white
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    height: 75px;
+}
+
+main {
+    flex: auto;
+    background-image: url( {{ url_for('static', filename='images/bg.jpeg') }} );
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    height: 25px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    background-repeat: repeat;
+}
+
+.bg {
+    height: 100%;
+    width: 100%;
+}
