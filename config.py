@@ -20,6 +20,7 @@ class Config(object):
     UPLOAD_EXTENSIONS = {'png', 'jpg', 'gif', 'txt', 'pdf'}
     TEMP_FOLDER = os.path.join(basedir, 'data/temp')
     ENCODINGS_FOLDER = os.path.join(basedir, 'data/encodings')
+    CHECKPOINTS_FOLDER = os.path.join(basedir, 'data/checkpoints')
 
     # Flask-Admin
     ADMIN_USER = 'admin'
@@ -27,4 +28,7 @@ class Config(object):
     FLASK_ADMIN_SWATCH = 'cerulean'
 
     # AES Encryptor config
-    ENCRYPTOR_KEY = '0deed0f720723e2698852a60'
+    ENCRYPTOR_KEY = SECRET_KEY
+
+
+

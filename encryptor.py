@@ -29,18 +29,18 @@ class Encryptor:
     def __init__(self, key):
         self.key = key
 
-    def encrypt_file(self, file_name):
+    def encrypt_file(self, file_name, key):
         with open(file_name, 'rb') as fo:
             plaintext = fo.read()
-        enc = encrypt(plaintext, self.key.encode('utf-8'))
+        enc = encrypt(plaintext, key.encode('utf-8'))
         with open(file_name + ".enc", 'wb') as fo:
             fo.write(enc)
         os.remove(file_name)
 
-    def decrypt_file(self, file_name):
+    def decrypt_file(self, file_name, key):
         with open(file_name, 'rb') as fo:
             ciphertext = fo.read()
-        dec = decrypt(ciphertext, self.key.encode("utf-8"))
+        dec = decrypt(ciphertext, key.encode("utf-8"))
         with open(file_name[:-4], 'wb') as fo:
             fo.write(dec)
         os.remove(file_name)

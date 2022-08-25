@@ -4,7 +4,8 @@ from hashlib import md5
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from Application import db, login
+from Application import db, login, app
+from encryptor import decrypt
 
 
 # Base class for all users of the system (Users, Admins, etc.)
@@ -50,7 +51,7 @@ class UserBase(UserMixin, db.Model):
             digest, size)
 
     def generate_key(self):
-        # Generate an encryption key for the user based on the time of creation
+        # Generate an encryption key for the content based on the time of creation
         return md5(self.created_at.strftime('%Y-%m-%d %H:%M:%S').encode('utf-8')).hexdigest()
 
 
@@ -86,7 +87,7 @@ class User(UserBase):
     __tablename__ = 'user'
     __mapper_args__ = {'polymorphic_identity': 'user'}
     id = db.Column(db.Integer, db.ForeignKey('user_base.id'), primary_key=True)
-    uploads = db.relationship('Upload', backref='user', lazy='dynamic')
+    uploads = db.relationship('Upload', backref='content', lazy='dynamic')
     verified = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
@@ -102,13 +103,14 @@ class User(UserBase):
             'created_at': time_to_string(self.created_at),
             'about_me': self.about_me,
             'last_seen': last_seen_to_string(self.last_seen),
-            'last_updated': time_to_string(self.last_updated),
+            'last_updated': last_seen_to_string(self.last_updated),
             'avatar': self.avatar(64),
             'uploads': [upload.serialize() for upload in self.uploads],
             'verified': self.verified,
             'login_count': self.login_count,
             'last_login_time': last_seen_to_string(self.last_login_time),
-            'job_id': self.job_id
+            'job_id': self.job_id,
+            'num_uploads': self.uploads.count()
         }
 
 
@@ -140,6 +142,7 @@ class Log(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user_base.id'))
     actionType = db.Column(db.String(80), nullable=False)  # Type of action
     done_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    ip_address = db.Column(db.String(80), nullable=False)
 
     def __repr__(self):
         return '<Log %r>' % self.actionType
@@ -148,24 +151,10 @@ class Log(db.Model):
         return {
             'id': self.id,
             'user_id': self.user_id,
-            'actionType': self.actionType,
-            'done_at': last_seen_to_string(self.done_at)
+            'actionType': decrypt(self.actionType, app.config['SECRET_KEY']),
+            'done_at': last_seen_to_string(self.done_at),
+            'ip_address': self.ip_address
         }
-
-
-class Behavior(db.Model):
-    __tablename__ = 'behavior'
-    user_id = db.Column(db.Integer, db.ForeignKey('user_base.id'), primary_key=True)
-    lower_login_time = db.Column(db.DateTime, nullable=False, default=datetime.now())
-    upper_login_time = db.Column(db.DateTime, nullable=False, default=datetime.now())
-    lower_logout_time = db.Column(db.DateTime, nullable=False, default=datetime.now())
-    upper_logout_time = db.Column(db.DateTime, nullable=False, default=datetime.now())
-    lower_upload_count = db.Column(db.Integer, nullable=False, default=0)
-    upper_upload_count = db.Column(db.Integer, nullable=False, default=0)
-    lower_download_count = db.Column(db.Integer, nullable=False, default=0)
-    upper_download_count = db.Column(db.Integer, nullable=False, default=0)
-    lower_delete_count = db.Column(db.Integer, nullable=False, default=0)
-    upper_delete_count = db.Column(db.Integer, nullable=False, default=0)
 
 
 def last_seen_to_string(time):

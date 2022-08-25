@@ -1,0 +1,13 @@
+{% extends 'layouts/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+    <div>
+    <h3>
+        Enter new profile info
+    </h3>
+    <dl class="col-xs-4">
+        {{ wtf.quick_form(form) }}
+    </dl>
+</div>
+{% endblock %}

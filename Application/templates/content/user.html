@@ -1,0 +1,71 @@
+{% extends 'layouts/base.html' %}
+<!-- User Profile contains content information and uploaded files-->
+{% block app_content %}
+<table class="table table-striped">
+    <tr class="table-primary">
+        <td colspan="2">
+            <!-- Contains information about the content like username, about_me and last seen -->
+            <p>
+                <img src="{{ user.avatar }}" alt="{{ user.username }}" class="img-thumbnail">
+            <h1>{{ user.username }}</h1>
+            {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
+            {% if user.last_seen %}<p>Last seen on: {{ user.last_seen }}</p>{% endif %}
+            {% if current_user.id == user.id %}
+            <a href="{{ url_for('edit_profile') }}">Edit your profile</a>
+            {% endif %}
+            {% if current_user.type == 'admin' %}
+                <a href="{{ url_for('edit_user', username=user.username) }}">Edit user</a>
+                <a href="{{ url_for('delete_user', username=user.username) }}">Delete user</a>
+                <p> Last login: {{ user.last_login }} </p>
+                <p> Number of logins: {{ user.login_count }} </p>
+                <p> Email: {{ user.email }} </p>
+                <p> Job ID: {{ user.job_id }} </p>
+                <p> Number of uploads: {{ user.num_uploads }} </p>
+                <a href="{{ url_for('activity', username=user.username ) }}">
+                    Activity of user.
+                </a>
+                {% if user.verified %}
+                    <a href="{{ url_for('block_user', user_id=user.id) }}">Block user</a>
+                {% else %}
+                    <a href="{{ url_for('verify_user', user_id=user.id) }}">Verify user</a>
+                {% endif %}
+            {% endif %}
+        </td>
+        {% if current_user.username == user.username %}
+        <td>
+            <!-- Contains the uploaded files in table form -->
+            <table class="table table-striped">
+                <tr class="table-primary">
+                    <th>File</th>
+                    <th>Upload Time</th>
+                    <th>Size</th>
+                    <th>Download</th>
+                    {% if current_user.id == user.id or current_user.type == "admin" %}
+                        <th>Delete</th>
+                    {% endif %}
+                </tr>
+                {% for file in user.uploads %}
+                <tr>
+                    <td>{{ file.filename }}</td>
+                    <td>{{ file.created_at }}</td>
+                    <td>{{ file.size }}</td>
+                    <td>
+                        <a href="{{ url_for('download_file', filename=file.filename) }}">
+                            <img src="{{ url_for('static', filename='images/download.png') }}" alt="Download">
+                        </a>
+                    </td>
+                    {% if current_user.id == user.id %}
+                    <td>
+                        <a href="{{ url_for('delete_file', filename=file.filename) }}">
+                            <img src="{{ url_for('static', filename='images/delete.png') }}" alt="Delete">
+                        </a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </table>
+        </td>
+        {% endif %}
+    </tr>
+</table>
+{% endblock %}

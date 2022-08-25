@@ -20,6 +20,7 @@ class RegistrationForm(FlaskForm):
                              validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password',
                                      validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Sign Up')
 
     def validate(self, **kwargs):
         if not super().validate():
@@ -35,13 +36,13 @@ class LoginForm(FlaskForm):
                            validators=[DataRequired(), Length(min=2, max=20)])
     password = PasswordField('Password',
                              validators=[DataRequired()])
-    remember = BooleanField('Remember Me')
+    remember_me = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
 
 class EditProfileForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
     about_me = TextAreaField('About me', validators=[Length(min=0, max=140)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Submit')
 
 
@@ -66,6 +67,5 @@ class EditUserForm(FlaskForm):
         if not super().validate():
             return False
 
-        validate_username(self.username)
         validate_email(self.email)
         return True

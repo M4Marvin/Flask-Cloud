@@ -3,3 +3,7 @@ migrate/ # Contains migrations.
 venv/   # Contains virtualenv.
 config.py # Contains configuration.
 __pychache__/ # Contains cache.
+
+*.onnx # Contains model.
+*.txt
+*.enc # Contains encodings.

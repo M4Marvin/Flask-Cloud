@@ -1,37 +1,38 @@
-from Application.models import User, Admin, Log, Upload, UserBase, Behavior
-from Application import db
 from datetime import datetime
+
+import cv2
+from flask import request
+
+from Application import app
+from Application import db
 from Application.faceAuth import verify_image, generate_encoding, authenticate_image
-
-"""
-    The database structure is as follows:
-    UserBase - 
-        User
-        Admin
-    Log
-    Upload (A record is added when a user uploads a file)
-         
-"""
+from Application.models import User, Admin, Log, Upload, UserBase
+from encryptor import encrypt
 
 
-def add_admin(username, password, email):
+def add_admin(username, password, email, job_id):
     admin = Admin()
     admin.username = username
     admin.password = password
     admin.email = email
+    admin.job_id = job_id
     db.session.add(admin)
     db.session.commit()
     print('Admin ' + username + ' added')
 
-    add_authentication(admin.id)
+    add_authentication_direct(admin.id)
     return admin
 
 
 def add_log(user_id, action_type):
+    key = app.config['SECRET_KEY']
+
     log = Log()
     log.user_id = user_id
+    action_type = encrypt(action_type, key)
     log.actionType = action_type
     log.done_at = datetime.now()
+    log.ip_address = request.remote_addr
     db.session.add(log)
     db.session.commit()
     print('Log added')
@@ -47,14 +48,9 @@ def add_user(username, password, email, job_id):
     user.job_id = job_id
     db.session.add(user)
     print('User ' + username + ' added')
-
-    behavior = Behavior()
-    behavior.user_id = user.id
-    db.session.add(behavior)
-
     db.session.commit()
 
-    return user.id
+    return user
 
 
 def add_upload(user_id, filename, size):
@@ -67,28 +63,29 @@ def add_upload(user_id, filename, size):
     return upload
 
 
-def delete_user(username):
+def delete_user_db(username):
     user = User.query.filter_by(username=username).first_or_404()
     db.session.delete(user)
-    # Remove user from UserBase as well
-    user = UserBase.query.filter_by(username=username).first_or_404()
-    db.session.delete(user)
-    # Delete all uploads for user
-    Upload.query.filter_by(user_id=user.id).delete()
-    # Delete all logs for user
-    Log.query.filter_by(user_id=user.id).delete()
+    db.session.commit()
 
+    # Delete all uploads for content
+    Upload.query.filter_by(user_id=user.id).delete()
+    db.session.commit()
+
+    # Delete all logs for content
+    Log.query.filter_by(user_id=user.id).delete()
     db.session.commit()
     print('User ' + username + ' deleted')
 
 
-def edit_user(username, email, about_me):
+def edit_user_db(username, email, about_me):
     user = User.query.filter_by(username=username).first_or_404()
     user.email = email
     user.about_me = about_me
     user.last_updated = datetime.now()
     db.session.commit()
-    print('User ' + username + ' edited')
+    print('User ' + user.username + ' edited')
+    return user
 
 
 def get_user(username):
@@ -97,7 +94,7 @@ def get_user(username):
 
 
 def get_user_by_id(user_id):
-    user = User.query.filter_by(id=user_id).first_or_404()
+    user = UserBase.query.filter_by(id=user_id).first_or_404()
     return user
 
 
@@ -118,7 +115,8 @@ def delete_all_users():
     # Get usernames of all users
     users = User.query.all()
     for user in users:
-        delete_user(user.username)
+        print("Deleting user: " + user.username)
+        delete_user_db(user.username)
 
 
 def add_authentication(user_id, image):
@@ -149,3 +147,84 @@ def authenticate(user_id, image):
             return "Authentication failed with error: " + str(e)
     else:
         return "Invalid image"
+
+
+def add_authentication_direct(id_encoding):
+    """
+    This function opens camera and takes a picture of the content and generates the encoding.
+    """
+    # Open camera
+
+    cap = cv2.VideoCapture(0)
+    cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
+
+    # Take picture on keypress 'q'
+    while True:
+        ret, frame = cap.read()
+        cv2.imshow('frame', frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # Close camera
+    cap.release()
+    cv2.destroyAllWindows()
+    cv2.waitKey(1)
+    cv2.waitKey(1)
+    cv2.waitKey(1)
+    cv2.waitKey(1)
+
+    # Generate encoding
+    generate_encoding(id_encoding, frame)
+    print("Encoding generated.")
+
+    return True
+
+
+def authenticate_direct(user_id):
+    """
+    This function opens camera and takes a picture of the content and authenticates the content.
+    """
+    # Open camera
+    cap = cv2.VideoCapture(0)
+
+    # Take picture on keypress 'q'
+    while True:
+        ret, frame = cap.read()
+        cv2.imshow('frame', frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # Close camera
+    cap.release()
+    cv2.destroyAllWindows()
+    cv2.waitKey(1)
+
+    # Authenticate
+    if authenticate_image(frame, user_id):
+        print("Authentication successful.")
+        return True
+    else:
+        print("Authentication failed.")
+        return False
+
+
+def verify_user_db(user_id):
+    user = User.query.filter_by(id=user_id).first_or_404()
+    user.verified = True
+    user.last_updated = datetime.now()
+    db.session.commit()
+
+
+def block_user_db(user_id):
+    user = User.query.filter_by(id=user_id).first_or_404()
+    user.blocked = True
+    user.last_updated = datetime.now()
+    db.session.commit()
+
+
+def increment_login_count(user_id):
+    user_id = int(user_id)
+    user = UserBase.query.filter_by(id=user_id).first_or_404()
+    user.login_count += 1
+    user.last_updated = datetime.now()
+    db.session.commit()

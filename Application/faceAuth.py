@@ -1,20 +1,22 @@
 import os
-
-import face_recognition
 import cv2
-
+import face_recognition
 import numpy as np
 
 from Application import app
+from Application.facetools import FaceDetection, LivenessDetection
 
-"""
-This is a simple face authentication system.
-It takes a picture of the user and then compares it to a stored encoding.
-If the encoding matches, the user is authenticated.
-If not, the user is denied.
+resNet_checkpoint_path = os.path.join(app.config['CHECKPOINTS_FOLDER'], 'InceptionResnetV1_vggface2.onnx')
+deepPix_checkpoint_path = os.path.join(app.config['CHECKPOINTS_FOLDER'], 'OULU_Protocol_2_model_0_0.onnx')
 
-It also generates a new encoding and stores it for the user.
-"""
+faceDetector = FaceDetection(max_num_faces=1)
+livenessDetector = LivenessDetection(checkpoint_path=deepPix_checkpoint_path)
+
+
+def get_liveness_score(frame):
+    faces, _ = faceDetector(frame)
+    face_arr = faces[0]
+    return livenessDetector(face_arr)
 
 
 def save_encoding(encoding, id_encoding):
@@ -27,7 +29,7 @@ def save_encoding(encoding, id_encoding):
 
 def get_encoding(id_encoding):
     """
-    This function gets the encoding for the user.
+    This function gets the encoding for the content.
     """
     file_path = os.path.join(app.config['ENCODINGS_FOLDER'], str(id_encoding) + ".txt")
     encoding = np.loadtxt(file_path)
@@ -36,9 +38,8 @@ def get_encoding(id_encoding):
 
 def authenticate_image(id_encoding, image):
     """
-    This function authenticates the user.
+    This function authenticates the content.
     """
-    image_path = os.path.join(app.config['ENCODINGS_FOLDER'], str(id_encoding) + ".jpg")
     encoding = face_recognition.face_encodings(image)[0]
     stored_encoding = get_encoding(id_encoding)
     match = face_recognition.compare_faces([stored_encoding], encoding, 0.5)[0]
@@ -48,7 +49,7 @@ def authenticate_image(id_encoding, image):
 
 def generate_encoding(id_encoding, image):
     """
-    This function generates the encoding for the user.
+    This function generates the encoding for the content.
     """
     encoding = face_recognition.face_encodings(image)[0]
     print(type(encoding))
@@ -62,12 +63,14 @@ def verify_image(image):
     faces = face_recognition.face_locations(image)
     if len(faces) != 1:
         return False
+    if get_liveness_score(image) < 0.8:
+        return False
     return True
 
 
 def add_authentication(id_encoding):
     """
-    This function opens camera and takes a picture of the user and generates the encoding.
+    This function opens camera and takes a picture of the content and generates the encoding.
     """
     # Open camera
     cap = cv2.VideoCapture(0)
@@ -92,7 +95,7 @@ def add_authentication(id_encoding):
 
 def authenticate(id_encoding):
     """
-    This function authenticates the user by opening camera and taking a picture of the user.
+    This function authenticates the content by opening camera and taking a picture of the content.
     """
     # Open camera
     cap = cv2.VideoCapture(0)
@@ -109,10 +112,13 @@ def authenticate(id_encoding):
     cv2.destroyAllWindows()
 
     # Authenticate
-    match = authenticate_image(id_encoding, frame)
-    if match:
-        print("Authentication successful.")
+    if verify_image(frame):
+        match = authenticate_image(id_encoding, frame)
+        if match:
+            print("Authentication successful.")
+        else:
+            print("Authentication failed.")
+        return match
     else:
-        print("Authentication failed.")
-    return match
-
+        print("Invalid Image.")
+        return False

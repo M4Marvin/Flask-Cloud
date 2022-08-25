@@ -1,0 +1,31 @@
+{% extends 'layouts/base.html' %}
+<!-- User Profile contains a list of all actions performed by the user -->
+{% block app_content %}
+
+    <h1>
+        {{ title }}
+    </h1>
+    <p>
+        Contains all activity by the user.
+    </p>
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr class="text-center">
+            <th>User_ID</th>
+            <th>Action</th>
+            <th>Date</th>
+            <th>IP</th>
+        </tr>
+    </thead>
+    <tbody class="text-center">
+        {% for log in logs %}
+            <tr class="text-center">
+                <td>{{ log.user_id }}</td>
+                <td>{{ log.actionType }}</td>
+                <td>{{ log.done_at }}</td>
+                <td>{{ log.ip_address }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
