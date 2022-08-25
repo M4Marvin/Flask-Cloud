@@ -382,3 +382,8 @@ def block_user(user_id):
             flash('Error blocking user.')
             print(e)
     return redirect(url_for('index'))
+
+
+@app.route('/share_file/<filename>', methods=['GET', 'POST'])
+@login_required
+def share_file(filename):

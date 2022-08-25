@@ -1,9 +1,10 @@
-data/  # Contains database, uploads and encodings.
-migrations/ # Contains migrations.
-venv/   # Contains virtualenv.
-config.py # Contains configuration.
-__pychache__/ # Contains cache.
+data/
+migrations/
+venv/
+config.py
+__pychache__/
 
-*.onnx # Contains model.
+*.onnx
 *.txt
-*.enc # Contains encodings.
+*.enc
+/data/
