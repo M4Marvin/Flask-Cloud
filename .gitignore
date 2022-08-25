@@ -1,5 +1,5 @@
 data/  # Contains database, uploads and encodings.
-migrate/ # Contains migrations.
+migrations/ # Contains migrations.
 venv/   # Contains virtualenv.
 config.py # Contains configuration.
 __pychache__/ # Contains cache.
