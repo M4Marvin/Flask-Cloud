@@ -1,13 +1,12 @@
 from datetime import datetime
 
 import cv2
+from cryptography.fernet import Fernet
 from flask import request
 
-from Application import app
-from Application import db
+from Application import app, db, fernet
 from Application.faceAuth import verify_image, generate_encoding, authenticate_image
 from Application.models import User, Admin, Log, Upload, UserBase
-from encryptor import encrypt
 
 
 def add_admin(username, password, email, job_id):
@@ -25,11 +24,9 @@ def add_admin(username, password, email, job_id):
 
 
 def add_log(user_id, action_type):
-    key = app.config['SECRET_KEY']
-
     log = Log()
     log.user_id = user_id
-    action_type = encrypt(action_type, key)
+    action_type = fernet.encrypt(action_type.encode())
     log.actionType = action_type
     log.done_at = datetime.now()
     log.ip_address = request.remote_addr
@@ -68,13 +65,18 @@ def delete_user_db(username):
     db.session.delete(user)
     db.session.commit()
 
+    print('User ' + username + ' deleted')
+
     # Delete all uploads for content
     Upload.query.filter_by(user_id=user.id).delete()
     db.session.commit()
+    print('All uploads deleted')
 
     # Delete all logs for content
     Log.query.filter_by(user_id=user.id).delete()
     db.session.commit()
+    print('All logs deleted')
+
     print('User ' + username + ' deleted')
 
 
@@ -228,3 +230,15 @@ def increment_login_count(user_id):
     user.login_count += 1
     user.last_updated = datetime.now()
     db.session.commit()
+
+
+def reset_db():
+    """
+    This function resets the database.
+    """
+    delete_all_uploads()
+    delete_all_users()
+    print('Database reset')
+
+
+

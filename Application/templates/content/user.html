@@ -11,7 +11,10 @@
             {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
             {% if user.last_seen %}<p>Last seen on: {{ user.last_seen }}</p>{% endif %}
             {% if current_user.id == user.id %}
-            <a href="{{ url_for('edit_profile') }}">Edit your profile</a>
+                <a href="{{ url_for('edit_profile') }}">Edit your profile</a>
+                <a href="{{ url_for('share_file_form') }}">Share a file</a>
+                <br>
+                <a href="{{ url_for('rename_file_form') }}">Rename a file</a>
             {% endif %}
             {% if current_user.type == 'admin' %}
                 <a href="{{ url_for('edit_user', username=user.username) }}">Edit user</a>
@@ -40,9 +43,7 @@
                     <th>Upload Time</th>
                     <th>Size</th>
                     <th>Download</th>
-                    {% if current_user.id == user.id or current_user.type == "admin" %}
-                        <th>Delete</th>
-                    {% endif %}
+                    <th>Delete</th>
                 </tr>
                 {% for file in user.uploads %}
                 <tr>
@@ -54,13 +55,11 @@
                             <img src="{{ url_for('static', filename='images/download.png') }}" alt="Download">
                         </a>
                     </td>
-                    {% if current_user.id == user.id %}
                     <td>
                         <a href="{{ url_for('delete_file', filename=file.filename) }}">
                             <img src="{{ url_for('static', filename='images/delete.png') }}" alt="Delete">
                         </a>
                     </td>
-                    {% endif %}
                 </tr>
                 {% endfor %}
             </table>
@@ -69,3 +68,5 @@
     </tr>
 </table>
 {% endblock %}
+
+

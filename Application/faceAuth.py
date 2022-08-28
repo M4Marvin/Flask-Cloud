@@ -42,7 +42,7 @@ def authenticate_image(id_encoding, image):
     """
     encoding = face_recognition.face_encodings(image)[0]
     stored_encoding = get_encoding(id_encoding)
-    match = face_recognition.compare_faces([stored_encoding], encoding, 0.5)[0]
+    match = face_recognition.compare_faces([stored_encoding], encoding, 0.4)[0]
 
     return match
 
@@ -63,7 +63,7 @@ def verify_image(image):
     faces = face_recognition.face_locations(image)
     if len(faces) != 1:
         return False
-    if get_liveness_score(image) < 0.8:
+    if get_liveness_score(image) < 0.1:
         return False
     return True
 

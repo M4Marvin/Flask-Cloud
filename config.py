@@ -16,6 +16,11 @@ class Config(object):
     DEBUG = True
     FLASK_ENV = 'development'
 
+    # Flask-session config
+    SESSION_TYPE = 'filesystem'
+    SESSION_FILE_DIR = os.path.join(basedir, 'data/sessions')
+    SESSION_PERMANENT = False
+
     UPLOAD_FOLDER = os.path.join(basedir, 'data/uploads')
     UPLOAD_EXTENSIONS = {'png', 'jpg', 'gif', 'txt', 'pdf'}
     TEMP_FOLDER = os.path.join(basedir, 'data/temp')
@@ -29,6 +34,7 @@ class Config(object):
 
     # AES Encryptor config
     ENCRYPTOR_KEY = SECRET_KEY
+    FERNET_KEY = b'ztuddVpY529lS77rU9XWnhmtoJiPjN38krZpLSQ0Ygg='
 
 
 

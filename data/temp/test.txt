@@ -1,8 +1,0 @@
- * Debugger is active!
- * Debugger PIN: 132-986-985
-127.0.0.1 - - [04/Aug/2022 15:03:57] "GET /upload HTTP/1.1" 200 -
-127.0.0.1 - - [04/Aug/2022 15:03:57] "GET /static/css/style.css HTTP/1.1" 304 -
-127.0.0.1 - - [04/Aug/2022 15:03:57] "GET /static/images/logo.png HTTP/1.1" 304 -
-127.0.0.1 - - [04/Aug/2022 15:03:57] "GET /static/images/plus-icon.png HTTP/1.1" 304 -
-127.0.0.1 - - [04/Aug/2022 15:03:57] "GET /static/images/bg.jpeg HTTP/1.1" 304 -
-data/uploads\7.jpg

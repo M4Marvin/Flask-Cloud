@@ -4,8 +4,7 @@ from hashlib import md5
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from Application import db, login, app
-from encryptor import decrypt
+from Application import db, login, fernet
 
 
 # Base class for all users of the system (Users, Admins, etc.)
@@ -151,7 +150,7 @@ class Log(db.Model):
         return {
             'id': self.id,
             'user_id': self.user_id,
-            'actionType': decrypt(self.actionType, app.config['SECRET_KEY']),
+            'actionType': fernet.decrypt(self.actionType).decode('utf-8'),
             'done_at': last_seen_to_string(self.done_at),
             'ip_address': self.ip_address
         }

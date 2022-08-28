@@ -1,4 +1,4 @@
-{% extends "laoyouts/base.html" %}
+{% extends "layouts/base.html" %}
 
 {% block app_content %}
 <video id="video" width="640" height="480" autoplay style="background-color: grey"></video>
@@ -43,7 +43,7 @@ function upload(file) {
             console.log(this.response);
             if (this.response == "Authentication successful") {
                 alert("Face authentication added successfully!");
-                window.location.replace("{{ url_for('login') }}");
+                window.location.replace("{{ url_for('logout') }}");
             }
             else if (failCount < 3) {
                 alert("Face authentication failed. Please try again.");
