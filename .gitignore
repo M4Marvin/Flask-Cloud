@@ -8,3 +8,4 @@ __pychache__/
 *.txt
 *.enc
 /data/
+*.pyc
