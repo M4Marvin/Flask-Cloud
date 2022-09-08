@@ -36,33 +36,36 @@ Welcome to Mosul CLoud
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('upload_file') }}">
-                        <img src="{{ url_for('static', filename='images/plus-icon.png') }}" width="30" height="30"
-                             class="d-inline-block align-top" alt="">
-                    </a>
+                    {% if current_user.type == 'user' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('upload_file') }}">
+                                <img src="{{ url_for('static', filename='images/plus-icon.png') }}" width="30" height="30"
+                                     class="d-inline-block align-top" alt="">
+                            </a>
+                        </li>
+                    {% endif %}
                     {% if current_user.type == 'admin' %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('users') }}">All users</a>
-                </li>
-                <li>
-                    <a class="nav-link" href="{{ url_for('all_logs') }}">All activity</a>
-                </li>
-                {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('user', username = current_user.username) }}">Profile</a>
-                </li>
-                {% endif %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                </li>
-                {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('register') }}">Register</a>
-                </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.users') }}">All users</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="{{ url_for('admin.all_activity') }}">All activity</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user', username = current_user.username) }}">Profile</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+                    </li>
                 {% endif %}
             </ul>
         </div>
@@ -72,7 +75,7 @@ Welcome to Mosul CLoud
 {% endblock %}
 
 {% block content %}
-<div class="container-body">
+<div class="container-body jumbotron vertical-center  text-center">
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}
@@ -100,11 +103,19 @@ Welcome to Mosul CLoud
         td{
             text-align: center;
         }
-        .container-body {
-            margin-top: 50px;
-            width: 100%;
-            height: 100%;
+        .vertical-center {
+            min-height: 100%;
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+
+            color: black;
         }
+        .jumbotron{
+            background-color: transparent;
+        }
+
     </style>
 <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}"/>
 {% endblock %}

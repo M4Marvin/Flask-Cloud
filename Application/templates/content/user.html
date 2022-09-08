@@ -17,20 +17,19 @@
                 <a href="{{ url_for('rename_file_form') }}">Rename a file</a>
             {% endif %}
             {% if current_user.type == 'admin' %}
-                <a href="{{ url_for('edit_user', username=user.username) }}">Edit user</a>
                 <a href="{{ url_for('delete_user', username=user.username) }}">Delete user</a>
                 <p> Last login: {{ user.last_login }} </p>
                 <p> Number of logins: {{ user.login_count }} </p>
                 <p> Email: {{ user.email }} </p>
                 <p> Job ID: {{ user.job_id }} </p>
                 <p> Number of uploads: {{ user.num_uploads }} </p>
-                <a href="{{ url_for('activity', username=user.username ) }}">
+                <a href="{{ url_for('admin.activity', username=user.username ) }}">
                     Activity of user.
                 </a>
                 {% if user.verified %}
-                    <a href="{{ url_for('block_user', user_id=user.id) }}">Block user</a>
+                    <a href="{{ url_for('admin.block', user_id=user.id) }}">Block user</a>
                 {% else %}
-                    <a href="{{ url_for('verify_user', user_id=user.id) }}">Verify user</a>
+                    <a href="{{ url_for('admin.verify', user_id=user.id) }}">Verify user</a>
                 {% endif %}
             {% endif %}
         </td>

@@ -9,12 +9,23 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+# Install cmake
+RUN apt-get update && apt-get install -y cmake
+
 # Install pip requirements
-COPY requirements.txt .
-RUN python -m pip install -r requirements.txt
+COPY requirements.txt requirements.txt
+RUN python -m venv venv
+RUN venv/bin/pip install -r requirements.txt
+RUN venv/bin/pip install gunicorn pymysql cryptography
 
 WORKDIR /app
-COPY . /app
+COPY Application .
+COPY migrations .
+COPY data/checkpoints .
+COPY app.py config.py boot.sh ./
+RUN chmod a+x boot.sh
+
+ENV FLASK_APP app.py
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers

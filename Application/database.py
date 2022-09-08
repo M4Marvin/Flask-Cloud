@@ -1,11 +1,10 @@
 from datetime import datetime
 
 import cv2
-from cryptography.fernet import Fernet
 from flask import request
 
-from Application import app, db, fernet
-from Application.faceAuth import verify_image, generate_encoding, authenticate_image
+from Application import db, fernet, app
+from Application.faceAuth import generate_encoding, authenticate_image
 from Application.models import User, Admin, Log, Upload, UserBase
 
 
@@ -119,36 +118,6 @@ def delete_all_users():
     for user in users:
         print("Deleting user: " + user.username)
         delete_user_db(user.username)
-
-
-def add_authentication(user_id, image):
-    user = User.query.filter_by(id=user_id).first_or_404()
-
-    if verify_image(image):
-        try:
-            generate_encoding(image, user_id)
-            user.authenticated = True
-            db.session.commit()
-            return "Success"
-        except Exception as e:
-            return "Error: " + str(e)
-        finally:
-            db.session.close()
-    else:
-        return "Invalid image"
-
-
-def authenticate(user_id, image):
-    if verify_image(image):
-        try:
-            if authenticate_image(image, user_id):
-                return "Authentication successful"
-            else:
-                return "Authentication failed"
-        except Exception as e:
-            return "Authentication failed with error: " + str(e)
-    else:
-        return "Invalid image"
 
 
 def add_authentication_direct(id_encoding):

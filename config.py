@@ -24,7 +24,7 @@ class Config(object):
     UPLOAD_FOLDER = os.path.join(basedir, 'data/uploads')
     UPLOAD_EXTENSIONS = {'png', 'jpg', 'gif', 'txt', 'pdf'}
     TEMP_FOLDER = os.path.join(basedir, 'data/temp')
-    ENCODINGS_FOLDER = os.path.join(basedir, 'data/encodings')
+    FACE_BANK_FOLDER = os.path.join(basedir, 'data/face_bank')
     CHECKPOINTS_FOLDER = os.path.join(basedir, 'data/checkpoints')
 
     # Flask-Admin

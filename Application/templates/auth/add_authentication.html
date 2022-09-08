@@ -1,5 +1,5 @@
-{% extends 'layouts/base.html' %}
-<!-- This page adds biometric face authorization after registration. -->
+{% extends "layouts/base.html" %}
+
 {% block app_content %}
 <video id="video" width="640" height="480" autoplay style="background-color: grey"></video>
 <button id="send">Take & Send Photo</button>
@@ -32,16 +32,16 @@ document.getElementById("send").addEventListener("click", function() {
 function upload(file) {
     // create form and append file
     var formdata =  new FormData();
-    formdata.append("snap", file);
+    formdata.append("face", file);
     formdata.append("user_id", "{{ user_id }}");
 
     // create AJAX requests POST with file
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "{{ url_for('login') }}");
+    xhr.open("POST", "{{ url_for('auth.register') }}");
     xhr.onload = function() {
         if(this.status = 200) {
             console.log(this.response);
-            if (this.response == "Authentication successful") {
+            if (this.response == "Success") {
                 alert("Face authentication successful!");
                 window.location.replace("{{ url_for('index') }}");
             }
@@ -51,7 +51,7 @@ function upload(file) {
             }
             else {
                 alert("Too many failed attempts. Account has been locked. \nPlease contact the administrator.");
-                window.location.replace("{{ url_for('login') }}");
+                window.location.replace("{{ url_for('auth.login') }}");
             }
         } else {
             console.error(xhr);
@@ -59,7 +59,5 @@ function upload(file) {
     };
     xhr.send(formdata);
 }
-
-
 </script>
 {% endblock %}

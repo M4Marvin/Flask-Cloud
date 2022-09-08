@@ -1,15 +1,17 @@
 {% extends 'layouts/base.html' %}
 
 {% block app_content %}
-<div class="child mt-5 center text-dark">
+<div class="container text-center text-info content">
+    <br>
+    <br>
     {% if current_user.is_authenticated %}
         <h1> Hi, {{ current_user.username }} </h1>
     {% else %}
         <h3>
-            <a href="{{ url_for('login') }}">Sign in</a>
+            <a href="{{ url_for('auth.login') }}">Sign in</a>
         </h3>
         <h3>
-            <a href="{{ url_for('register') }}">Register</a>
+            <a href="{{ url_for('auth.register') }}">Register</a>
         </h3>
     {% endif %}
 </div>
@@ -18,31 +20,17 @@
 {% block styles %}
     {{ super() }}
     <style>
-        body{
-            background-image: url("{{ url_for('static', filename='images/bg_home.jpg') }}");
-            background-size: cover;
-            background-repeat: repeat;
-            background-position: center;
-            background-attachment: fixed;
-            height: 100vh;
-            width: 100vw;
-        }
-        .child{
-            margin-top: 50px;
-            width: 100%;
-            height: 100%;
-            center;
-        }
+
         th{
             text-align: center;
         }
         td{
             text-align: center;
         }
-        .container-body {
-            margin-top: 50px;
-            width: 100%;
-            height: 100%;
+        .container-body{
+            background-image: url("{{ url_for('static', filename='images/bg-home.jpeg') }}");
+            background-size: 100% auto;
+            background-repeat: repeat-y;
         }
     </style>
 

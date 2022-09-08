@@ -21,4 +21,21 @@ fernet = Fernet(app.config['FERNET_KEY'])
 # Initialize the Encryptor
 encryptor = Encryptor(app.config['ENCRYPTOR_KEY'])
 
-from Application import routes, models, errors
+# Import and register blueprints
+from Application.errors import bp as errors_bp
+app.register_blueprint(errors_bp)
+
+from Application.admin import bp as admin_bp
+app.register_blueprint(admin_bp, url_prefix='/admin')
+
+from Application.auth import bp as auth_bp
+
+app.register_blueprint(auth_bp, url_prefix='/auth')
+
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+)
+
+from Application import routes, models

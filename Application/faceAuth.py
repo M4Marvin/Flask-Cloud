@@ -1,10 +1,11 @@
 import os
 import cv2
-import face_recognition
 import numpy as np
+import onnxruntime
+import csv
 
 from Application import app
-from Application.facetools import FaceDetection, LivenessDetection
+from Application.facetools import FaceDetection, LivenessDetection, IdentityVerification
 
 resNet_checkpoint_path = os.path.join(app.config['CHECKPOINTS_FOLDER'], 'InceptionResnetV1_vggface2.onnx')
 deepPix_checkpoint_path = os.path.join(app.config['CHECKPOINTS_FOLDER'], 'OULU_Protocol_2_model_0_0.onnx')
@@ -40,31 +41,53 @@ def authenticate_image(id_encoding, image):
     """
     This function authenticates the content.
     """
-    encoding = face_recognition.face_encodings(image)[0]
-    stored_encoding = get_encoding(id_encoding)
-    match = face_recognition.compare_faces([stored_encoding], encoding, 0.4)[0]
+    face_bank_file_name = str(id_encoding) + ".csv"
+    identity_checker = IdentityVerification(checkpoint_path=resNet_checkpoint_path,
+                                            facebank_path=os.path.join(app.config['FACE_BANK_FOLDER'],
+                                                                       face_bank_file_name))
 
-    return match
+    faces, _ = faceDetector(image)
+
+    if len(faces) != 1:
+        return False
+
+    face_arr = faces[0]
+    _, mean_sim_score = identity_checker(face_arr)
+    liveness_score = livenessDetector(face_arr)
+
+    print(f"Liveness score: {liveness_score}")
+    print(f"Mean similarity score: {mean_sim_score}")
+
+    if liveness_score < 0.1 or mean_sim_score > 0.6:
+        return False
+    return True
 
 
 def generate_encoding(id_encoding, image):
     """
-    This function generates the encoding for the content.
+    This function generates the encoding for the face
     """
-    encoding = face_recognition.face_encodings(image)[0]
-    print(type(encoding))
-    save_encoding(encoding, id_encoding)
+    resnet = onnxruntime.InferenceSession(resNet_checkpoint_path, providers=["CPUExecutionProvider"])
+    face_bank_file_name = str(id_encoding) + ".csv"
 
+    faces, _ = faceDetector(image)
+    face_arr = faces[0]
 
-def verify_image(image):
-    """
-    This function verifies that the image contains exactly one face.
-    """
-    faces = face_recognition.face_locations(image)
     if len(faces) != 1:
         return False
-    if get_liveness_score(image) < 0.1:
-        return False
+
+    face_arr = np.moveaxis(face_arr, -1, 0)
+    input_arr = np.expand_dims((face_arr - 127.5) / 128.0, 0)
+    embeddings = resnet.run(["output"], {"input": input_arr.astype(np.float32)})[0]
+
+    # Create the folder if it doesn't exist
+    if not os.path.exists(app.config['FACE_BANK_FOLDER']):
+        os.makedirs(app.config['FACE_BANK_FOLDER'])
+
+    with open(os.path.join(app.config['FACE_BANK_FOLDER'], face_bank_file_name), 'a') as f:
+        writer = csv.writer(f)
+        writer.writerow(embeddings.flatten().tolist())
+
     return True
 
 
@@ -112,13 +135,4 @@ def authenticate(id_encoding):
     cv2.destroyAllWindows()
 
     # Authenticate
-    if verify_image(frame):
-        match = authenticate_image(id_encoding, frame)
-        if match:
-            print("Authentication successful.")
-        else:
-            print("Authentication failed.")
-        return match
-    else:
-        print("Invalid Image.")
-        return False
+    return authenticate_image(id_encoding, frame)

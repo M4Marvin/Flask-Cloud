@@ -7,7 +7,7 @@
 </h1>
 <p>
     Welcome to the admin panel.
-    Click <a href="{{ url_for('all_logs') }}">here </a> to get a list of all activity.
+    Click <a href="{{ url_for('admin.all_activity') }}">here </a> to get a list of all activity.
     A list of all users:
 </p>
 <table class="table table-striped text-center">
@@ -25,7 +25,7 @@
         {% for user in users %}
         <tr class="text-center">
             <td>
-                <a href="{{ url_for('user', username=user.username) }}" class="text-dark">
+                <a href="{{ url_for('user', username=user.username) }}" class="">
                     {{ user.username }}
                 </a>
             </td>
@@ -46,9 +46,6 @@
             <td>
                 <a href="{{ url_for('user', username = user.username) }}">
                     <img src="{{ url_for('static', filename='images/eye-icon.png') }}" width="30" height="30" class="d-inline-block align-top" alt="">
-                </a>
-                <a href="{{ url_for('edit_user', username = user.username) }}">
-                    <img src="{{ url_for('static', filename='images/pencil-icon.png') }}" width="30" height="30" class="d-inline-block align-top" alt="">
                 </a>
                 <a href="{{ url_for('delete_user', username = user.username) }}">
                     <img src="{{ url_for('static', filename='images/delete.png') }}" width="30" height="30" class="d-inline-block align-top" alt="">
