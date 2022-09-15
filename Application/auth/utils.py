@@ -49,7 +49,7 @@ def get_upload_count(user_id):
     :return: number of uploads
     """
     uploads = UserBase.query.get(user_id).uploads
-    return len(uploads)
+    return uploads.count()
 
 
 def login_user_(user_id):

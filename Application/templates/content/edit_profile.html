@@ -2,7 +2,7 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-    <div>
+<div class="container">
     <h3>
         Enter new profile info
     </h3>
@@ -11,3 +11,13 @@
     </dl>
 </div>
 {% endblock %}
+
+{% block styles %}
+{{ super() }}
+    <style>
+        h3{
+            color : black;
+        }
+    </style>
+{% endblock %}
+

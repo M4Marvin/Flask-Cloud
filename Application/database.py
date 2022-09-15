@@ -1,10 +1,9 @@
 from datetime import datetime
 
-import cv2
 from flask import request
 
 from Application import db, fernet, app
-from Application.faceAuth import generate_encoding, authenticate_image
+from Application.faceAuth import add_authentication
 from Application.models import User, Admin, Log, Upload, UserBase
 
 
@@ -18,7 +17,7 @@ def add_admin(username, password, email, job_id):
     db.session.commit()
     print('Admin ' + username + ' added')
 
-    add_authentication_direct(admin.id)
+    add_authentication(admin.id)
     return admin
 
 
@@ -43,8 +42,13 @@ def add_user(username, password, email, job_id):
     user.email = email
     user.job_id = job_id
     db.session.add(user)
+    try:
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        db.session.rollback()
+        return False
     print('User ' + username + ' added')
-    db.session.commit()
 
     return user
 
@@ -120,65 +124,6 @@ def delete_all_users():
         delete_user_db(user.username)
 
 
-def add_authentication_direct(id_encoding):
-    """
-    This function opens camera and takes a picture of the content and generates the encoding.
-    """
-    # Open camera
-
-    cap = cv2.VideoCapture(0)
-    cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
-
-    # Take picture on keypress 'q'
-    while True:
-        ret, frame = cap.read()
-        cv2.imshow('frame', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    # Close camera
-    cap.release()
-    cv2.destroyAllWindows()
-    cv2.waitKey(1)
-    cv2.waitKey(1)
-    cv2.waitKey(1)
-    cv2.waitKey(1)
-
-    # Generate encoding
-    generate_encoding(id_encoding, frame)
-    print("Encoding generated.")
-
-    return True
-
-
-def authenticate_direct(user_id):
-    """
-    This function opens camera and takes a picture of the content and authenticates the content.
-    """
-    # Open camera
-    cap = cv2.VideoCapture(0)
-
-    # Take picture on keypress 'q'
-    while True:
-        ret, frame = cap.read()
-        cv2.imshow('frame', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    # Close camera
-    cap.release()
-    cv2.destroyAllWindows()
-    cv2.waitKey(1)
-
-    # Authenticate
-    if authenticate_image(frame, user_id):
-        print("Authentication successful.")
-        return True
-    else:
-        print("Authentication failed.")
-        return False
-
-
 def verify_user_db(user_id):
     user = User.query.filter_by(id=user_id).first_or_404()
     user.verified = True
@@ -187,8 +132,9 @@ def verify_user_db(user_id):
 
 
 def block_user_db(user_id):
+    print(f'Blocking user with id {user_id}')
     user = User.query.filter_by(id=user_id).first_or_404()
-    user.blocked = True
+    user.verified = False
     user.last_updated = datetime.now()
     db.session.commit()
 

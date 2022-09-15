@@ -58,7 +58,7 @@ def authenticate_image(id_encoding, image):
     print(f"Liveness score: {liveness_score}")
     print(f"Mean similarity score: {mean_sim_score}")
 
-    if liveness_score < 0.1 or mean_sim_score > 0.6:
+    if liveness_score < 0.1 or mean_sim_score > 1:
         return False
     return True
 
@@ -84,7 +84,7 @@ def generate_encoding(id_encoding, image):
     if not os.path.exists(app.config['FACE_BANK_FOLDER']):
         os.makedirs(app.config['FACE_BANK_FOLDER'])
 
-    with open(os.path.join(app.config['FACE_BANK_FOLDER'], face_bank_file_name), 'a') as f:
+    with open(os.path.join(app.config['FACE_BANK_FOLDER'], face_bank_file_name), 'w') as f:
         writer = csv.writer(f)
         writer.writerow(embeddings.flatten().tolist())
 

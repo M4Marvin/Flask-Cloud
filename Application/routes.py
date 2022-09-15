@@ -33,11 +33,15 @@ def before_request():
 @login_required
 def user(username):
     # Verify user session
-    if not current_user.username == username and not current_user.type == 'admin':
+    print(f'Verifying session for {current_user.username}')
+    print(f'User behaviour is suspicious: {verify_session()}')
+
+    if current_user.username == username and current_user.type == 'user':
         if not verify_session():
             # Block user if session is invalid
             block_user_db(current_user.id)
             logout_user()
+            flash('Your account has been blocked due to suspicious behaviour.', 'danger')
             return redirect(url_for('auth.login'))
     # Block the user if he deleted all files
     if current_user.type == 'user':
@@ -284,10 +288,13 @@ def verify_session():
     """
     Checks if the user behaviour is suspicious.
     """
-    print(f'{session.get("num_renames", 0)}')
-    print(f'{session.get("num_deletes", 0)}')
-    if session.get('num_deletes') >= session.get('num_uploads'):
+    print(f'Number of uploads: {session["init_num_uploads"]}')
+    print(f'Number of deletes: {session["num_deletes"]}')
+    print(f'Number of renames: {session["num_renames"]}')
+    if session['init_num_uploads'] == 0:
+        return True
+    if session.get('num_deletes') >= session.get('init_num_uploads'):
         return False
-    if session.get('num_renames') >= session.get('num_uploads'):
+    if session.get('num_renames') >= session.get('init_num_uploads'):
         return False
     return True
