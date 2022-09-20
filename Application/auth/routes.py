@@ -33,12 +33,7 @@ def login():
 
         # Authenticate face
         print(f'Authenticating face for user {user_id}')
-
-        # Calculate the time taken to authenticate
-        start = time.time()
         status = face_authenticate(image, user_id)
-        end = time.time()
-        print(f'Face authentication took {end - start} seconds')
 
         if status == 200:
             print('Face authentication successful')

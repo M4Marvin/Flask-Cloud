@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import onnxruntime
 import csv
+import time
 
 from Application import app
 from Application.facetools import FaceDetection, LivenessDetection, IdentityVerification
@@ -46,14 +47,21 @@ def authenticate_image(id_encoding, image):
                                             facebank_path=os.path.join(app.config['FACE_BANK_FOLDER'],
                                                                        face_bank_file_name))
 
+    # Calculate the time taken for each step
+    start_time = time.time()
+
     faces, _ = faceDetector(image)
+    print(f'Face detection time: {time.time() - start_time}')
 
     if len(faces) != 1:
         return False
 
     face_arr = faces[0]
     _, mean_sim_score = identity_checker(face_arr)
+    print(f'Identity verification time: {time.time() - start_time}')
+
     liveness_score = livenessDetector(face_arr)
+    print(f'Liveness detection time: {time.time() - start_time}')
 
     print(f"Liveness score: {liveness_score}")
     print(f"Mean similarity score: {mean_sim_score}")
